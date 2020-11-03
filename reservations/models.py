@@ -7,7 +7,7 @@ class Booking(models.Model) :
 	checkin_date = models.DateField(auto_now=False, auto_now_add=False)
 	checkout_date= models.DateField(auto_now=False, auto_now_add=False)
 	guests 		 = models.IntegerField()
-	price 		 = models.IntegerField()
+	price 		 = models.DecimalField(max_digits=1000, decimal_places=2)
 	creditcard 	 = models.CharField(max_length=200)
 	request_date = models.DateField(auto_now=False, auto_now_add=False)
 	accept_date  = models.DateField(auto_now=False, auto_now_add=False)
