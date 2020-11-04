@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'user',
     'stay',
+    'reservation',
 ]
 
 MIDDLEWARE = [
