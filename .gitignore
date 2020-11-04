@@ -1,4 +1,5 @@
 my_settings.py
+db_uploader.py
 *.csv
 __pycache__/
 ### macOS ###
