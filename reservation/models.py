@@ -3,7 +3,6 @@ from django.db import models
 from stay.models import Stay
 from user.models import User, Host
 
-
 class Booking(models.Model) :
     stay          = models.ForeignKey(Stay, on_delete = models.CASCADE)
     guest         = models.ForeignKey(User, on_delete = models.CASCADE)
