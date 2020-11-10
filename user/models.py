@@ -38,4 +38,4 @@ class Like(models.Model) :
 	wishlist     = models.ForeignKey('Wishlist', on_delete = models.CASCADE)
 
 	class Meta:
-            db_table = 'likes'
+		db_table = 'likes' 
