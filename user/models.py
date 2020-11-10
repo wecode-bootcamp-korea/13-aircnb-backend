@@ -26,7 +26,6 @@ class Host(models.Model) :
     class Meta:
         db_table = 'hosts'
 
-
 class Like(models.Model) :
     stay         = models.ForeignKey('stay.Stay', on_delete = models.CASCADE)
     user         = models.ForeignKey('user', on_delete = models.CASCADE)
