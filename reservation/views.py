@@ -12,27 +12,29 @@ from my_settings      import SECRET_KEY, ALGORITHM
 #USER MADE
 from user.models      import User, Host
 from stay.models      import Stay
+from reservation.utils import login_decorator
 
 
 class Reservation(View) :
 
-    #@login_decorator 
+    @login_decorator 
 
     def post(self, request) :
         
         try :
-            #user_id = request.user.id
-            user_id = 5
+            user_id = request.user.id
+            print(user_id)
             data    = json.loads(request.body)
+            print(data)
             Booking.objects.create(
-                                    stay          = data['stay'],
-                                    guest         = user_id,
-                                    checkin_date  = data['checkin_date'],
-                                    checkout_date = data['checkout_date'],
-                                    guest_number  = data['guest_number'],
-                                    price         = data['price'],
-                                    creditcard    = data['creditcard'],
-                                    )
+            stay_id       = data['stay'],
+            guest_id      = user_id,
+            checkin_date  = data['checkin_date'],
+            checkout_date = data['checkout_date'],
+            guest_number  = data['guest_number'],
+            price         = data['price'],
+            creditcard    = data['creditcard']
+            )
 
         except Exception as e:
             return JsonResponse({'MESSAGE':f'ERROR {e}'}, status = 400)
