@@ -120,12 +120,12 @@ class UserSignUp(TestCase):
         Room.objects.all().delete()
 
 
-    def test_UserInfo_creation(self):
+    def test_UserSignup_success(self):
         client = Client()
         user   = {
             name               = 'Brendan Schaub',
             gender             = 'Male',
-            email              = 'schaubster@gmail.com',
+            email              = 'schaubster1@gmail.com',
             phone_number       = '01032321234',
             emergency_contact  = '01033993333',
             introduction       = 'Im just a small town girl, living in a lonely world',
@@ -141,20 +141,110 @@ class UserSignUp(TestCase):
     def test_UserSignUp_NoEmail(self):
         client = Client()
         user   = {
-                  name               = 'Brendan Schaub',
-                  gender             = 'Male',
-                  phone_number       = '01032321234',
-                  emergency_contact  = '01033993333',
-                  introduction       = 'Im just a small town girl, living in a lonely world',
-                  image_url          = 'https://stackoverflow.com/questions/2428092/creating-a-json-response-using-django-and-python',
-                  address            = '경기도 황포시 강구대로 188-12',
-                  date_of_birth      = '1990-11-06',
-                  password           = '889dnv92!'
+            name               = 'Brendan Schaub',
+            gender             = 'Male',
+            phone_number       = '01032321234',
+            emergency_contact  = '01033993333',
+            introduction       = 'Im just a small town girl, living in a lonely world',
+            image_url          = 'https://stackoverflow.com/questions/2428092/creating-a-json-response-using-django-and-python',
+            address            = '경기도 황포시 강구대로 188-12',
+            date_of_birth      = '1990-11-06',
+            password           = '889dnv92!'
         }
-        response = client.post('/user/signup' , json.dumps(user), content_type='application/json')
+        response = client.post('/user/signup' , json.dumps(user), content_type ='application/json')
 
         self.assertEqual(response.status_code, 400)
 
+    def test_UserSignup_Email_Overlap(self):
+        client = Cient()
+
+        user2 = {
+            name               = 'Brendan Schaub',
+            gender             = 'Male',
+            email              = 'schaubster@gmail.com',
+            phone_number       = '01032321234',
+            emergency_contact  = '01033993333',
+            introduction       = 'Im just a small town girl, living in a lonely world',
+            image_url          = 'https://stackoverflow.com/questions/2428092/creating-a-json-response-using-django-and-python',
+            address            = '경기도 황포시 강구대로 188-12',
+            date_of_birth      = '1990-11-06',
+            password           = '889dnv92!'
+        }
+
+        response2 = client.post('/user/signup' , json.dumps(user2), content_type ='application/json')
+        self.assertEqual(response2.status_code, 400)
+
+    def test_google_signup_success(self, mocked_requests) :
+        client = Client()
+
+        class MockedResponse :
+            def json(self) :
+                return {
+                        'iss'            : 'accounts.google.com',
+                        'azp'            : '1099506966197-9h0n051p5v9emnie5lhpaiua4p69dn40.apps.googleusercontent.com',
+                        'aud'            : '1099506966197-9h0n051p5v9emnie5lhpaiua4p69dn40.apps.googleusercontent.com',
+                        'sub'            : '102291767017405493680',
+                        'email'          : 'vannskang@gmail.com',
+                        'email_verified' : 'true',
+                        'at_hash'        : 'QNyMOJVaH_IZwFZnBM7IKA',
+                        'name'           : 'Vanns Kang',
+                        'picture'        : 'https://lh3.googleusercontent.com/a-/AOh14Gg6piLV5bghlg2x6fjag_gr50CG9hYnQi4cgisPhA=s96-c',
+                        'given_name'     : 'Vanns',
+                        'family_name'    : 'Kang',
+                        'locale'         : 'en',
+                        'iat'            : '1605061977',
+                        'exp'            : '1605065577',
+                        'jti'            : 'c02e78bc4de74075dc8eafc630cd2be10a7e36a1',
+                        'alg'            : 'RS256',
+                        'kid'            : 'd946b137737b973738e5286c208b66e7a39ee7c1',
+                        'typ'            : 'JWT'
+                }
+            mocked_requests.get = MagicMock(return_value = MockedResponse())
+            response = client.post("/user/signin/google"**{'HTTP_AUTHORIZATION' : '12212' , 'content_type' : 'application/json' })
+
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json(),{"AUTHORIZATION" : response.json()['AUTHORIZATION']})
+
+    def test_google_signup_fail(self, mocked_requests) :
+        client = Client()
+        class MockedResponse :
+            def json(self) :
+                return {
+                        'iss'            : 'accounts.google.com',
+                        'azp'            : '1099506966197-9h0n051p5v9emnie5lhpaiua4p69dn40.apps.googleusercontent.com',
+                        'aud'            : '1099506966197-9h0n051p5v9emnie5lhpaiua4p69dn40.apps.googleusercontent.com',
+                        'sub'            : '102291767017405493680',
+                        'email'          : 'vannskang@gmail.com',
+                        'email_verified' : 'true',
+                        'at_hash'        : 'QNyMOJVaH_IZwFZnBM7IKA',
+                        'name'           : 'Vanns Kang',
+                        'picture'        : 'https://lh3.googleusercontent.com/a-/AOh14Gg6piLV5bghlg2x6fjag_gr50CG9hYnQi4cgisPhA=s96-c',
+                        'given_name'     : 'Vanns',
+                        'family_name'    : 'Kang',
+                        'locale'         : 'en',
+                        'iat'            : '1605061977',
+                        'exp'            : '1605065577',
+                        'jti'            : 'c02e78bc4de74075dc8eafc630cd2be10a7e36a1',
+                        'alg'            : 'RS256',
+                        'kid'            : 'd946b137737b973738e5286c208b66e7a39ee7c1',
+                        'typ'            : 'JWT'
+                }
+#{'iss': 'accounts.google.com', 
+#'azp': '1099506966197-9h0n051p5v9emnie5lhpaiua4p69dn40.apps.googleusercontent.com', 
+#'aud': '1099506966197-9h0n051p5v9emnie5lhpaiua4p69dn40.apps.googleusercontent.com', 
+#'sub': '102291767017405493680', 
+#'email': 'vannskang@gmail.com', 
+#'email_verified': 'true', 
+#'at_hash': 'QNyMOJVaH_IZwFZnBM7IKA', 
+#'name': 'Vanns Kang', 
+#'picture': 'https://lh3.googleusercontent.com/a-/AOh14Gg6piLV5bghlg2x6fjag_gr50CG9hYnQi4cgisPhA=s96-c', 'given_name': 'Vanns', 'family_name': 'Kang', 'locale': 'en', 'iat': '1605061977', 'exp': '1605065577', 'jti': 'c02e78bc4de74075dc8eafc630cd2be10a7e36a1', 'alg': 'RS256', 'kid': 'd946b137737b973738e5286c208b66e7a39ee7c1', 'typ': 'JWT'}
+
+
+#{'id': 1525921852, 'connected_at': '2020-11-08T08:31:40Z', 
+# 'properties': {'nickname': 'soomyung'}, 
+# 'kakao_account': {'profile_needs_agreement': False, 'profile': {'nickname': 'soomyung'}, 
+# 'has_email': True, 'email_needs_agreement': False, 'is_email_valid': True, 'is_email_verified': True, 
+# 'email': 'michael.jordan@kakao.com', 'has_age_range': True, 'age_range_needs_agreement': False, 'age_range': '30~39'}}
 
 class LikeFunction(TestCase) :
 

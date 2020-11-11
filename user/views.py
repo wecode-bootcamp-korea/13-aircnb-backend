@@ -79,8 +79,11 @@ class GoogleAuth(View) :
         
         try :
             data  = json.loads(request.body)
+            print(data)
             token           = data['AUTHORIZATION']
+            print(token)
             google_response = requests.get(f'https://oauth2.googleapis.com/tokeninfo?id_token={token}')
+            print(google_response)
             google_identity = google_response.json()
             print(google_identity)
 
@@ -113,7 +116,7 @@ class KakaoAuth(View) :
             authorization_header = ({'AUTHORIZATION' : f'Bearer {authorization}'})
             kakao_response       = requests.get('https://kapi.kakao.com/v2/user/me', headers=authorization_header)
             kakao_identity       = kakao_response.json()
-
+            print(kakao_identity)
             try:
                 nickname = kakao_identity['kakao_account']['profile']['nickname']
                 email    = kakao_identity['kakao_account']['email']
@@ -171,10 +174,17 @@ class Like(View) :
             data         = json.loads(request.body)
             stay         = data['stay_id']
 
-            Like.objects.create(stay_id = stay, user_id = user_id)
+            like, created = Like.objects.get_or_create(stay_id = stay, user_id = user_id)
+
+            if created == False :
+                like.delete()
+                return JsonResponse({'SUCCESS' : 'UNLIKED'}, status = 202)
+
+            if created == True :
+                return  JsonResponse({'SUCCESS' : 'LIKED'}, status = 200)
 
         except KeyError:
-            return JsonResponse ({'MESSAGE' : 'KEYERROR'})
+            return JsonResponse({'MESSAGE' : 'KEYERROR'})
         except Exception as e:
             return JsonResponse({'MESSAGE':f'ERROR {e}'}, status = 400)
 
@@ -192,5 +202,7 @@ class LikeList(View) :
                             'stay_id' : queryset.stay.id
                             }
             } for stays in queryset]
-        except :
-            print('1')
+        except KeyError:
+            return JsonResponse({'MESSAGE' : 'KEYERROR'})
+        except Exception as e:
+            return JsonResponse({'MESSAGE':f'ERROR {e}'}, status = 400)
