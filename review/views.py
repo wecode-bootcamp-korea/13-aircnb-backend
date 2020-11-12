@@ -20,13 +20,11 @@ from review.utils     import login_decorator
 
 
 class ReviewView(View) :
-    @login_decorator
     def get(self, request) :
         try:
-            user_id           = request.user.id
             offset            = int(request.GET.get('offset', 0))
-            limit             = int(request.GET.get('limit', offset + 5))
-            stay_id           = int(request.GET['stay_id'])
+            limit             = int(request.GET.get('limit'))
+            stay_id           = int(request.GET.get('stay_id'))
             reviews           = Review.objects.filter(stay_id = stay_id).select_related('stay','guest')
             cleanliness_avg   = reviews.aggregate(Avg("cleanliness_star"))['cleanliness_star__avg']
             communication_avg = reviews.aggregate(Avg("communication_star"))['communication_star__avg']
@@ -62,10 +60,8 @@ class ReviewView(View) :
                 "accuracy_star"      : review.accuracy_star,
                 "location_star"      : review.location_star,
                 "value_star"         : review.value_star
-                } for review in reviews[offset:limit] ]
+                } for review in reviews[offset: offset+limit]]
 
             return JsonResponse({"overall": review_overview, "review_list" : review_list}, status=200)
-        except user_id.DoesNotExist:
-            return JsonResponse({"MESSAGE": "LOGIN_PLEASE"}, status=400)
         except KeyError:
             return JsonResponse({"MESSAGE": "KEYERROR"}, status=400)

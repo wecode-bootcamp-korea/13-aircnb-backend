@@ -24,7 +24,6 @@ class Reservation(View) :
     def post(self, request) :
         try :
             user_id = request.user.id
-            print(user_id)
             data    = json.loads(request.body)
             print(data)
             Booking.objects.get_or_create(
@@ -49,10 +48,10 @@ class Reservation(View) :
                 fail_silently = False
             )
             return JsonResponse({"MESSAGE": "SUCCESS"}, status=200)
-        except IndexError as e:
-            return JsonResponse({"MESSAGE": f"ERROR{e}"}, status=400)
-        except Exception as e:
-            return JsonResponse({"MESSAGE": f"ERROR{e}"}, status=400)
+        except KeyError:
+            return JsonResponse({"MESSAGE": "KEYERROR"}, status=400)
+        except User.DoesNotExist:
+            return JsonResponse({"MESSAGE": "CHECK_USERNAME_PASSWORD"}, status=400)
 
 
 
@@ -67,5 +66,5 @@ class Cancellation(View) :
                                         booking     = data['booking_id'],
                                         user        = user_id,
                                         )
-        except Exception as e:
-            return JsonResponse({'MESSAGE':f'ERROR {e}'}, status = 400)    
+        except User.DoesNotExist:
+            return JsonResponse({'MESSAGE':'USER_NONEXISTANT'}, status = 400)    
