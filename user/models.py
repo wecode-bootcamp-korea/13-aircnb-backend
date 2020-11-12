@@ -15,27 +15,22 @@ class User(models.Model) :
     created_at        = models.DateTimeField(auto_now_add = True)
     update_at         = models.DateTimeField(auto_now = True, null = True)
 
+
     class Meta:
         db_table = 'users'
 
 class Host(models.Model) :
-	user         = models.OneToOneField('User', on_delete = models.CASCADE)
-	is_verified  = models.BooleanField()
-	is_superhost = models.BooleanField()
+    user         = models.OneToOneField('User', on_delete = models.CASCADE)
+    is_verified  = models.BooleanField()
+    is_superhost = models.BooleanField()
 
-	class Meta:
-		db_table = 'hosts'
+    class Meta:
+        db_table = 'hosts'
 
-class Wishlist(models.Model) :
-	user         = models.ForeignKey('User', on_delete = models.CASCADE)
-	name         = models.CharField(max_length = 100)
-
-	class Meta:
-		db_table = 'wishlists'
 
 class Like(models.Model) :
-	stay         = models.ForeignKey('stay.Stay', on_delete = models.CASCADE)
-	wishlist     = models.ForeignKey('Wishlist', on_delete = models.CASCADE)
+    stay         = models.ForeignKey('stay.Stay', on_delete = models.CASCADE)
+    user         = models.ForeignKey('user', on_delete = models.CASCADE)
 
-	class Meta:
-            db_table = 'likes'
+    class Meta:
+        db_table = 'likes'
