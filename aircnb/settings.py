@@ -18,6 +18,19 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
+#EMAIL_BACKEND tells Django which custom or predefined email backend will work with EMAIL_HOST.
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST_USER = 'airchickenandbeer@gmail.com'
+EMAIL_HOST_PASSWORD = my_settings.EMAIL_HOST_PASS
+EMAIL_PORT = 587
+#Choose the way to encrypt the mail and protect your user account.
+#It is likely that your email provider explicitly tells which option to use.
+EMAIL_USE_TLS = True
+#EMAIL_USE_SSL = None
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
 # Application definition
 
 INSTALLED_APPS = [
