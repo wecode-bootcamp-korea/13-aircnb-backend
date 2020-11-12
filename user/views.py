@@ -1,10 +1,10 @@
-#OS
+
 import json
 import re
 import bcrypt
 import jwt
 import requests
-#DJANGO
+
 from django.shortcuts import render
 from django.http      import JsonResponse
 from django.views     import View
@@ -21,7 +21,7 @@ class SignUpView(View) :
     def post(self, request):
         data = json.loads(request.body)
         email_form    = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
-        password_form = '^[A-Za-z0-9]{6,}$'
+        password_form = '^(?=.{8,16})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*$'
         try:
             if not re.match(email_form, data['email']) :
                 return JsonResponse({'MESSAGE' : 'EMAIL_FORM'}, status = 401)
@@ -33,11 +33,9 @@ class SignUpView(View) :
                 User.objects.create(
                     email         = data['email'],
                     name          = data['name'],
-                    phone_number  = data['phone_number'],
                     password      = bcrypt.hashpw(data['password'].encode('utf-8'),bcrypt.gensalt()).decode(),
-                    date_of_birth = data['date_of_birth']
                 )
-                return JsonResponse({'MESSAGE' : 'ACCOUNT_CREATED'}, status = 401)
+                return JsonResponse({'MESSAGE' : 'ACCOUNT_CREATED'}, status = 200)
         except KeyError:
             return JsonResponse({'MESSAGE' : 'KEY_ERROR'}, status = 401)
 
@@ -52,14 +50,14 @@ class SignInView(View) :
         except account.DoesNotExist:
             return JsonResponse({'NO_USER'}, status = 400)
         except KeyError :
-            return JsonResponse({'MESSAGE' : 'KeyError'}, status = 400)
-        except Exception as e:
-            return JsonResponse({'MESSAGE':f'ERROR {e}'}, status = 400)
+            return JsonResponse({'MESSAGE' : 'KEYERROR'}, status = 400)
+        except User.DoesNotExist:
+            return JsonResponse({'MESSAGE': 'CHECK_USERNAME_PASSWORD'}, status = 400)
 
 class GoogleAuth(View) :
     def post(self, request) :
         try :
-            data  = json.loads(request.body)
+            data            = json.loads(request.body)
             token           = data['AUTHORIZATION']
             google_response = requests.get(f'https://oauth2.googleapis.com/tokeninfo?id_token={token}')
             google_identity = google_response.json()
@@ -72,8 +70,8 @@ class GoogleAuth(View) :
                 google_login.image_url = google_identity['picture']
                 google_login.save()
             return JsonResponse ({'MESSAGE' : 'GOOGLE_AUTH_SUCCESSFUL' , 'AUTHORIZATION' : jwt.encode({'id' : google_login.id}, SECRET_KEY, ALGORITHM).decode()}, status = 200)
-            if google_identity['email_verified'] == 'false' :
-                return JsonResponse({'MESSAGE' : 'UNVERIFIED_GOODLE_TOKEN'})
+            if not google_identity['email_verified'] :
+                return JsonResponse({'MESSAGE' : 'UNVERIFIED_GOODLE_TOKEN'}, status = 400)
         except KeyError:
             return JsonResponse({'MESSAGE':'TOKEN_ERROR'}, status = 400)
         except IndexError as e:
@@ -110,9 +108,7 @@ class Liker(View) :
                 return JsonResponse({'SUCCESS' : 'UNLIKED'}, status = 202)
             if created == True :
                 return  JsonResponse({'SUCCESS' : 'LIKED'}, status = 200)
-        except stay.DoesNotExist:
-                return JsonResponse({'MESSAGE' : 'STAY_DOESNT_EXIST'}, status = 400)
-        except user_id.DoesNotExist :
+            if not user_id :
                 return JsonResponse({'MESSAGE' : 'USER_NOT_SIGNED_IN'}, status = 400)
         except KeyError :
             return JsonResponse({'MESSAGE' : 'KEY_ERROR'}, status = 400)
@@ -166,4 +162,4 @@ class LikeList(View) :
             if not user_id :
                 return JsonResponse({'MESSAGE' : 'USER_NOT_SIGNED_IN'}, status = 400)
         except Stay.DoesNotExist:
-            return JsonResponse({"MESSAGE": "NOTFOUND"}, status=400)
+            return JsonResponse({"MESSAGE": "NOT_FOUND"}, status=400)
