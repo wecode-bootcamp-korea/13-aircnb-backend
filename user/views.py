@@ -156,7 +156,8 @@ class LikeList(View) :
                 "has_like"       : Like.objects.filter(user_id = user_id, stay_id = stay.id).exists(),
                 "imgUrl"         : [image.image_url for image in stay.image_set.all()],
                 "review_count"   : stay.review_set.count(),
-                "overall_star"   : sum([stay.review_set.aggregate(Avg(rating_star))[rating_star+'__avg'] for rating_star in rating_stars])/len(rating_stars)
+                "overall_star"   : sum([stay.review_set.aggregate(Avg(rating_star))[rating_star+'__avg'] 
+                                        for rating_star in rating_stars])/len(rating_stars)
             } for stay in stays[offset:limit] ]
             return JsonResponse({"stay": list(liked_stays)}, status=200)
             if not user_id :
